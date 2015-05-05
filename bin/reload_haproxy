@@ -1,3 +1,9 @@
 #!/bin/bash
 
+HAPROXY_PASS=${HAPROXY_PASS:-$(pwgen -s 36 1)}
+
+sed -i "s/admin:.*/admin:$HAPROXY_PASS/g" /etc/haproxy/haproxy.cfg
+
+echo "[haproxy] Reloading with password ${HAPROXY_PASS}"
+
 [[ -e /app/haproxy.pid ]] && haproxy -f /etc/haproxy/haproxy.cfg -p /app/haproxy.pid -V -D -sf `cat /app/haproxy.pid`
