@@ -70,7 +70,7 @@ function configure_etcd() {
   export ETCD_OPTIONS="--no-sync -C $ETCD"
   # wait for etcd to be available
   until etcdctl --no-sync -C $ETCD ls >/dev/null 2>&1; do
-    echo "echo ==> waiting for etcd at $ETCD..."
+    echo "==> waiting for etcd at $ETCD..."
     sleep $(($ETCD_TTL/2))  # sleep for half the TTL
   done
   # wait until etcd has discarded potentially stale values
