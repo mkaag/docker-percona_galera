@@ -2,19 +2,18 @@ Percona/Galera Docker Image
 ===========================
 
 This docker image contains Percona with the galera extentions and XtraBackup installed.
-
 If etcd is available it will automatically cluster itself with Galera and the XtraBackup SST.
 
 Fetching
 ========
 
-    $ git clone https://github.com/paulczar/docker-percona_galera.git
-    cd docker-percona_galera
+    $ git clone https://github.com/mkaag/docker-percona_galera
+    $ cd docker-percona_galera
 
 Building
 ========
 
-    $ docker build -t paulczar/percona-galera .
+    $ docker build -t mkaag/percona .
 
 Running
 =======
@@ -22,9 +21,10 @@ Running
 Just a database
 ---------------
 
-MySQL root user is available from localhost without a password.  a default user/pass pair of admin/admin is pulled in from environment variables which has root like perms.  set it to something sensible.
+MySQL root user is available from localhost without a password. A default user/pass pair of admin/admin is pulled 
+in from environment variables which has root like perms.  set it to something sensible.
 
-	 $ docker run -d -e MYSQL_USER=admin -e MYSQL_PASS=lolznopass paulczar/percona-galera
+	 $ docker run -d -e MYSQL_USER=admin -e MYSQL_PASS=lolznopass mkaag/percona
 	  ==> $HOST not set.  booting mysql without clustering.
 	  ==> An empty or uninitialized database is detected in /var/lib/mysql
     ==> Creating database...
@@ -45,7 +45,10 @@ MySQL root user is available from localhost without a password.  a default user/
 Galera Cluster
 --------------
 
-When etcd is available the container will check to see if there's an existing cluster, if so it will join it.  If not it will perform an election that will last for 5 minutes.  During that time the first server that can grab a lock becomes the leader and any other nodes will wait until that server is ready before starting.   If the leader fails to start the election is busted and all nodes will need to be destroyed until the 5 minutes passes.
+When etcd is available the container will check to see if there's an existing cluster, if so it will join it. 
+If not it will perform an election that will last for 5 minutes. 
+During that time the first server that can grab a lock becomes the leader and any other nodes will wait until that server is ready before starting. 
+If the leader fails to start the election is busted and all nodes will need to be destroyed until the 5 minutes passes.
 
 An example Vagrantfile is provided which will start a 3 node `CoreOS` cluster each node running a
 database with replication automatically set up.
@@ -57,7 +60,7 @@ database with replication automatically set up.
 At this point the coreos user-data is starting the database.  It has to be downloaded from the docker hub first, and this can take some time.   Eventually the container will start and you'll see this in the console:
 
     CONTAINER ID        IMAGE                            COMMAND             CREATED              STATUS              PORTS                                                                                            NAMES
-    912ad42a4d1a        paulczar/percona-galera:latest   "/app/bin/boot"     About a minute ago   Up About a minute   0.0.0.0:3306->3306/tcp, 0.0.0.0:4444->4444/tcp, 0.0.0.0:4567->4567/tcp, 0.0.0.0:4568->4568/tcp   database
+    912ad42a4d1a        mkaag/percona:latest             "/app/bin/boot"     About a minute ago   Up About a minute   0.0.0.0:3306->3306/tcp, 0.0.0.0:4444->4444/tcp, 0.0.0.0:4567->4567/tcp, 0.0.0.0:4568->4568/tcp   database
 
 Next we can watch mysql starting by utilizing `journalctl`
 
@@ -103,20 +106,32 @@ GarbD
 If you want to stick to a two node cluster you can start garbd to act as the arbiter.
 
     $ eval `cat /etc/environment`
-    $ /usr/bin/docker run --name database-garbd --rm -p 3306:3306 -p 4444:4444 -p 4567:4567 -p 4568:4568 -e PUBLISH=4567 -e HOST=$COREOS_PRIVATE_IPV4 -e CLUSTER=openstack paulczar/percona-galera:latest /app/bin/garbd
+    $ /usr/bin/docker run --name database-garbd --rm \
+        -p 3306:3306 -p 4444:4444 -p 4567:4567 -p 4568:4568 \
+        -e PUBLISH=4567 -e HOST=$COREOS_PRIVATE_IPV4 \
+        -e CLUSTER=openstack \
+        mkaag/percona:latest /app/bin/garbd
 
 Load Balancer
 -------------
 
-You can use an external load balancer if you have one DB per host.  If you're getting fancy you can also run a local haproxy load balancer ( or multiples ) which will load balance ( round robin, nothing fancy ) database connections between your nodes
+You can use an external load balancer if you have one DB per host. 
+If you're getting fancy you can also run a local haproxy load balancer (or multiples) which will 
+load balance ( round robin, nothing fancy ) database connections between your nodes
 
     $ eval `cat /etc/environment`
-    $ /usr/bin/docker run --name database-loadbalancer --rm -p 3307:3307 -p 8888:8080 -e PUBLISH=3307 -e HOST=$COREOS_PRIVATE_IPV4 paulczar/percona-galera:latest /app/bin/loadbalancer
+    $ /usr/bin/docker run --name database-loadbalancer \
+        --rm -p 3307:3307 -p 1936:1936 -e PUBLISH=3307 \
+        -e HOST=$COREOS_PRIVATE_IPV4 \
+        mkaag/percona:latest /app/bin/loadbalancer
 
 Development
 -----------
 
-You can use vagrant in developer mode which will install the service but not run it.  it will also enable debug mode on the start script, share the local path into `/home/coreos/share` via `nfs` and build the image locally.   This takes quite a while as it builds the image on each VM, but once its up further rebuilds should be quick thanks to the caches.
+You can use vagrant in developer mode which will install the service but not run it. 
+It will also enable debug mode on the start script, share the local path into `/home/coreos/share` 
+via `nfs` and build the image locally. This takes quite a while as it builds the image on each VM, 
+but once its up further rebuilds should be quick thanks to the caches.
 
     $ dev=1 vagrant up
     $ vagrant ssh core-01
