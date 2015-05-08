@@ -9,9 +9,9 @@ function etcd_make_directory {
 }
 
 function on_exit() {
-    kill -TERM $SERVICE_PID
-    wait $SERVICE_PID 2>/dev/null
-    exit 0
+  kill -TERM $SERVICE_PID
+  wait $SERVICE_PID 2>/dev/null
+  exit 0
 }
 
 function cluster_members() {
