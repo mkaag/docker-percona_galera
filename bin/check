@@ -6,5 +6,5 @@
 echo checking $1
 
 if grep -q "<no value>" $1 ; then
-    exit 1
+  exit 1
 fi
