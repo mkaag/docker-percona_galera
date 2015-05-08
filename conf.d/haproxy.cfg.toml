@@ -5,6 +5,7 @@ owner = "root"
 group = "root"
 mode  = "0644"
 keys = [
+  "/database/credentials/haproxy",
   "/database/port",
   "/database/cluster/mysqlNodes"
 ]

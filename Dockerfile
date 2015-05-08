@@ -41,7 +41,6 @@ RUN \
   lsb-release \
   locales \
   socat \
-  pwgen \
   curl
 
 RUN \

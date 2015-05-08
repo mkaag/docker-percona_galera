@@ -19,6 +19,8 @@ MYSQL_USER=${MYSQL_USER:-admin}
 MYSQL_PASS=${MYSQL_PASS:-admin}
 REP_USER=${REP_USER:-replicator}
 REP_PASS=${REP_PASS:-replicator}
+HAPROXY_USER=${HAPROXY_USER:-admin}
+HAPROXY_PASS=${HAPROXY_PASS:-admin}
 PORT=${PUBLISH:-3306}
 PROTO=${PROTO:-tcp}
 ETCD_HOST=${ETCD_HOST:-$HOST}
@@ -40,6 +42,8 @@ etcd_set_default credentials/adminUser ${MYSQL_USER}
 etcd_set_default credentials/adminPass ${MYSQL_PASS}
 etcd_set_default credentials/repUser ${REP_USER}
 etcd_set_default credentials/repPass ${REP_PASS}
+etcd_set_default credentials/haproxy/statsUser ${HAPROXY_USER}
+etcd_set_default credentials/haproxy/statsPass ${HAPROXY_PASS}
 etcd_set_default host $HOST
 etcd_set_default port $PORT
 
